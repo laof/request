@@ -9,3 +9,6 @@ Manually creating folders at gopath/src/golang.org/x/net
 
 
 rsrc -manifest test.manifest --ico icon.ico -o rsrc.syso
+
+go build -ldflags="-w -s"
+upx -9 *.exe
