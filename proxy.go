@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -17,13 +17,18 @@ type jsonTypeData struct {
 	workExample `json:"workExample"`
 }
 
-func Proxy(cha chan ProxyData, pd ProxyData) {
+func Proxy(cha chan string) {
 
-	host, _ := Decode("aHR0cHM6Ly9jb2Rlc2FuZGJveC5pby9zL2dpdGh1Yi9sYW9mL3Nzc3NhbmRib3g=")
+	url := []string{
+		"aHR0cHM6Ly9jb2Rlc2FuZGJveC5pby9zL2",
+		"dpdGh1Yi9sYW9mL3Nzc3NhbmRib3g=",
+	}
+
+	host, _ := Decode(strings.Join(url, ""))
 	res, fail := http.Get(string(host))
 
 	if fail != nil {
-		cha <- pd
+		cha <- ""
 		return
 	}
 	defer res.Body.Close()
@@ -31,13 +36,13 @@ func Proxy(cha chan ProxyData, pd ProxyData) {
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 
 	if err != nil {
-		cha <- pd
+		cha <- ""
 		return
 	}
 
 	scripts := doc.Find("script")
 	if len(scripts.Nodes) <= 0 {
-		cha <- pd
+		cha <- ""
 		return
 	}
 
@@ -58,49 +63,25 @@ func Proxy(cha chan ProxyData, pd ProxyData) {
 	})
 
 	if jsonStr == "" {
-		cha <- pd
+		cha <- ""
 		return
 	}
 
 	jsonData := jsonTypeData{}
 	json.Unmarshal([]byte(jsonStr), &jsonData)
 
-	vurl := jsonData.workExample.URL
+	view := jsonData.workExample.URL
 
-	if strings.HasPrefix(vurl, "http") {
-		pd.online = vurl
-	} else {
-		cha <- pd
+	if !strings.HasPrefix(view, "http") {
+		cha <- ""
 		return
 	}
 
-	vr, ve := http.Get(vurl)
-
-	if ve != nil {
-		cha <- pd
-		return
+	nodes := PDBody(view)
+	if strings.Contains(nodes, "ssr://") {
+		fmt.Println("---2---")
 	}
 
-	defer vr.Body.Close()
-
-	vd, verr := goquery.NewDocumentFromReader(vr.Body)
-
-	if verr != nil {
-		cha <- pd
-		return
-	}
-
-	vnode := vd.Find("html")
-
-	if len(vnode.Nodes) == 0 {
-		d, e := ioutil.ReadAll(vr.Body)
-
-		if e == nil {
-			pd.code = string(d)
-		}
-
-	}
-
-	cha <- pd
+	cha <- nodes
 
 }

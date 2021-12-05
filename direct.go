@@ -1,14 +1,22 @@
 package main
 
 import (
-	"io/ioutil"
+	"fmt"
 	"net/http"
-	"regexp"
+	"strings"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
 func Direct(cha chan string) {
 
-	host, _ := Decode("aHR0cHM6Ly9naXRodWIuY29tL0FsdmluOTk5OS9uZXctcGFjL3dpa2kvc3MlRTUlODUlOEQlRTglQjQlQjklRTglQjQlQTYlRTUlOEYlQjc=")
+	url := []string{
+		"aHR0cHM6Ly9naXRodWIuY29tL0FsdmluOTk5O",
+		"S9uZXctcGFjL3dpa2kvc3MlRTUlODUlOEQlRT",
+		"glQjQlQjklRTglQjQlQTYlRTUlOEYlQjc=",
+	}
+
+	host, _ := Decode(strings.Join(url, ""))
 	resp, err := http.Get(string(host))
 
 	if err != nil {
@@ -16,29 +24,60 @@ func Direct(cha chan string) {
 		return
 	}
 	defer resp.Body.Close()
-	body, ierr := ioutil.ReadAll(resp.Body)
+	// Load the HTML document
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
 
-	if ierr != nil {
+	if err != nil {
 		cha <- ""
 		return
 	}
 
-	buf := string(body)
-
-	reg := regexp.MustCompile(`</?.+?/?>`)
-
-	old := reg.ReplaceAllStringFunc(buf, func(str string) string {
-		return "\n" + str + "\n"
+	// target := []string{"p", "label", "span", "strong", "i", "em"}
+	var nodes []string
+	doc.Find("p").Each(func(i int, s *goquery.Selection) {
+		txt := s.Text()
+		if hasPrefix(txt) {
+			nodes = append(nodes, txt)
+		}
 	})
 
-	reg = regexp.MustCompile(`ssr://(.*?)(\s|[\r\n]$)`)
-
-	txt := reg.FindAllString(old, -1)
-	var all string
-	for _, text := range txt {
-		all += "\n" + text
+	if len(nodes) > 0 {
+		fmt.Println("---1---")
 	}
 
-	cha <- all
+	cha <- strings.Join(nodes, "\n")
 
+}
+
+func hasPrefix(text string) bool {
+
+	if strings.HasPrefix(text, "ssr://") || strings.HasPrefix(text, "ss://") {
+		return true
+	}
+	return false
+
+	// buf := string(body)
+
+	// reg := regexp.MustCompile(`</?.+?/?>`)
+
+	// html := reg.ReplaceAllStringFunc(buf, func(str string) string {
+	// 	return "\n" + str + "\n"
+	// })
+
+	// ssr
+	// reg = regexp.MustCompile(`ssr://(.*?)(\s|[\r\n]$)`)
+
+	// txt := reg.FindAllString(html, -1)
+	// var nodes []string
+	// for _, text := range txt {
+	// 	nodes = append(nodes, text)
+	// }
+
+	// // ss
+	// reg = regexp.MustCompile(`ss://(.*?)(\s|[\r\n]$)`)
+
+	// sstxt := reg.FindAllString(html, -1)
+	// for _, txt := range sstxt {
+	// 	nodes = append(nodes, txt)
+	// }
 }
