@@ -4,10 +4,11 @@ import "fmt"
 
 func Request() string {
 
+	fmt.Println("connection ...")
 	nodes := Direct()
 
 	if nodes == "" {
-		fmt.Println("connection fail, starting proxy channel...")
+		fmt.Println("starting proxy channel ...")
 		nodes = Proxy()
 	}
 
