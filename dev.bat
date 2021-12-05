@@ -1,2 +1,2 @@
-go build
-request.exe
+cd cmd
+go run main.go

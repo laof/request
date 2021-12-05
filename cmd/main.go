@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	. "github.com/laof/request"
+)
 
 func main() {
 
