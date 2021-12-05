@@ -1,14 +1,13 @@
 package request
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
-func Direct(cha chan string) {
+func Direct() string {
 
 	url := []string{
 		"aHR0cHM6Ly9naXRodWIuY29tL0FsdmluOTk5O",
@@ -20,16 +19,14 @@ func Direct(cha chan string) {
 	resp, err := http.Get(string(host))
 
 	if err != nil {
-		cha <- ""
-		return
+		return ""
 	}
 	defer resp.Body.Close()
 	// Load the HTML document
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 
 	if err != nil {
-		cha <- ""
-		return
+		return ""
 	}
 
 	// target := []string{"p", "label", "span", "strong", "i", "em"}
@@ -41,11 +38,7 @@ func Direct(cha chan string) {
 		}
 	})
 
-	if len(nodes) > 0 {
-		fmt.Println("---1---")
-	}
-
-	cha <- strings.Join(nodes, "\n")
+	return strings.Join(nodes, "\n")
 
 }
 

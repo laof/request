@@ -2,7 +2,6 @@ package request
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -17,7 +16,7 @@ type jsonTypeData struct {
 	workExample `json:"workExample"`
 }
 
-func Proxy(cha chan string) {
+func Proxy() string {
 
 	url := []string{
 		"aHR0cHM6Ly9jb2Rlc2FuZGJveC5pby9zL2",
@@ -28,22 +27,19 @@ func Proxy(cha chan string) {
 	res, fail := http.Get(string(host))
 
 	if fail != nil {
-		cha <- ""
-		return
+		return ""
 	}
 	defer res.Body.Close()
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 
 	if err != nil {
-		cha <- ""
-		return
+		return ""
 	}
 
 	scripts := doc.Find("script")
 	if len(scripts.Nodes) <= 0 {
-		cha <- ""
-		return
+		return ""
 	}
 
 	var jsonStr string
@@ -63,8 +59,7 @@ func Proxy(cha chan string) {
 	})
 
 	if jsonStr == "" {
-		cha <- ""
-		return
+		return ""
 	}
 
 	jsonData := jsonTypeData{}
@@ -73,15 +68,11 @@ func Proxy(cha chan string) {
 	view := jsonData.workExample.URL
 
 	if !strings.HasPrefix(view, "http") {
-		cha <- ""
-		return
+		return ""
 	}
 
 	nodes := PDBody(view)
-	if strings.Contains(nodes, "ssr://") {
-		fmt.Println("---2---")
-	}
 
-	cha <- nodes
+	return nodes
 
 }
