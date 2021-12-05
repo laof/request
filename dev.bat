@@ -1,2 +1,2 @@
 go build
-ssr-key.exe
+request.exe
