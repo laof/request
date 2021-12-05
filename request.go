@@ -7,7 +7,7 @@ func Request() string {
 	nodes := Direct()
 
 	if nodes == "" {
-		fmt.Println("starting proxy channel")
+		fmt.Println("connection fail, starting proxy channel...")
 		nodes = Proxy()
 	}
 
