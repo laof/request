@@ -1,14 +1,16 @@
 package request
 
-import "fmt"
+import (
+	"log"
+)
 
 func Request() string {
 
-	fmt.Println("connection ...")
+	log.Println("connection ...")
 	nodes := Direct()
 
 	if nodes == "" {
-		fmt.Println("starting proxy channel ...")
+		log.Println("starting proxy channel ...")
 		nodes = Proxy()
 	}
 

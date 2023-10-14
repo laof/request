@@ -34,6 +34,13 @@ func Direct() string {
 	doc.Find("p").Each(func(i int, s *goquery.Selection) {
 		txt := s.Text()
 		if hasPrefix(txt) {
+
+			aquery := s.Find("a")
+			if len(aquery.Nodes) >= 0 {
+				a, _ := goquery.OuterHtml(aquery)
+				txt = strings.Replace(txt, a, aquery.Text(), 1)
+			}
+
 			nodes = append(nodes, txt)
 		}
 	})
