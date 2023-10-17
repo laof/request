@@ -2,21 +2,20 @@ package main
 
 import (
 	"fmt"
+	"log"
 
-	. "github.com/laof/request"
+	"github.com/laof/request"
 )
 
 func main() {
 
-	// ch := make(chan string)
-	// go Direct(ch)
-	// fmt.Println(<-ch)
+	str, err := request.New()
 
-	// cp := make(chan string)
-	// go Proxy(cp)
-	// fmt.Println(<-cp)
+	if err != nil {
+		log.Fatalf(err.Error())
+		return
+	}
 
-	str := Request()
 	fmt.Println(str)
 
 }
